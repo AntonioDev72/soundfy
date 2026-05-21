@@ -1,17 +1,22 @@
 import { useState } from 'react';
 import { usePlayer } from '../context/PlayerContext';
+import { useAuth } from '../context/AuthContext';
+import AuthModal from './AuthModal';
 import api from '../services/api';
 
 export default function TrackCard({ track, onPlay, onRemove, isFavorite: initialFav = false }) {
   const { currentTrack, isPlaying } = usePlayer();
+  const { user } = useAuth();
   const [fav, setFav] = useState(initialFav);
   const [loading, setLoading] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
 
   const isActive = currentTrack?.deezerId === track.deezerId;
 
   const toggleFav = async (e) => {
     e.stopPropagation();
+    if (!user) { setShowAuth(true); return; }
     if (loading) return;
     setLoading(true);
     try {
@@ -33,35 +38,36 @@ export default function TrackCard({ track, onPlay, onRemove, isFavorite: initial
   };
 
   return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{ background: isActive ? 'var(--bg-hover)' : 'var(--bg-card)', borderRadius: 10, padding: '0.75rem', cursor: 'pointer', transition: 'all 0.2s', border: isActive ? '1px solid var(--accent)' : '1px solid transparent', position: 'relative' }}
-    >
-      {/* Cover */}
-      <div style={{ position: 'relative', marginBottom: '0.75rem' }} onClick={onPlay}>
-        <img src={track.cover} alt={track.title} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 8, display: 'block' }} />
-        {/* Play overlay */}
-        {(hovered || isActive) && (
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ width: 44, height: 44, background: 'var(--accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
-              {isActive && isPlaying ? '⏸' : '▶'}
+    <>
+      <div
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{ background: isActive ? 'var(--bg-hover)' : 'var(--bg-card)', borderRadius: 10, padding: '0.75rem', cursor: 'pointer', transition: 'all 0.2s', border: isActive ? '1px solid var(--accent)' : '1px solid transparent', position: 'relative' }}
+      >
+        <div style={{ position: 'relative', marginBottom: '0.75rem' }} onClick={onPlay}>
+          <img src={track.cover} alt={track.title} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 8, display: 'block' }} />
+          {(hovered || isActive) && (
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: 44, height: 44, background: 'var(--accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
+                {isActive && isPlaying ? '⏸' : '▶'}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+
+        <p style={{ fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: isActive ? 'var(--accent)' : '#fff', marginBottom: 2 }}>{track.title}</p>
+        <p style={{ fontSize: 12, color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: 4 }}>{track.artist}</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatDuration(track.duration)}</span>
+          <button onClick={toggleFav} style={{ fontSize: 16, transition: 'transform 0.15s', color: fav ? '#e85d5d' : 'var(--text-muted)' }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+            {fav ? '❤️' : '🤍'}
+          </button>
+        </div>
       </div>
 
-      {/* Info */}
-      <p style={{ fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: isActive ? 'var(--accent)' : '#fff', marginBottom: 2 }}>{track.title}</p>
-      <p style={{ fontSize: 12, color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: 4 }}>{track.artist}</p>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatDuration(track.duration)}</span>
-        <button onClick={toggleFav} style={{ fontSize: 16, transition: 'transform 0.15s', color: fav ? '#e85d5d' : 'var(--text-muted)' }}
-          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'}
-          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-          {fav ? '❤️' : '🤍'}
-        </button>
-      </div>
-    </div>
+      {showAuth && <AuthModal tab="register" onClose={() => setShowAuth(false)} />}
+    </>
   );
 }
