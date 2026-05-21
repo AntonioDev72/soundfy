@@ -26,9 +26,15 @@ export default function Home() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 32, fontWeight: 800, marginBottom: '2rem', letterSpacing: -1 }}>
-        {timeOfDay()}, {user?.name?.split(' ')[0]} 👋
+      <h1 style={{ fontSize: 32, fontWeight: 800, marginBottom: '0.5rem', letterSpacing: -1 }}>
+        {user ? `${timeOfDay()}, ${user.name.split(' ')[0]} 👋` : `${timeOfDay()} 👋`}
       </h1>
+      {!user && (
+        <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: '2rem' }}>
+          Sign up to save your favorite tracks and create playlists.
+        </p>
+      )}
+      {user && <div style={{ marginBottom: '2rem' }} />}
 
       <section>
         <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: '1.25rem' }}>🔥 Trending Now</h2>

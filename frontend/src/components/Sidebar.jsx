@@ -1,5 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import AuthModal from './AuthModal';
+import { useState } from 'react';
 
 const HomeIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12.5 3.247a1 1 0 0 0-1 0L4 7.577V20h4.5v-6a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v6H20V7.577l-7.5-4.33z"/></svg>;
 const SearchIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M10.533 1.279c-5.18 0-9.407 4.14-9.407 9.279s4.226 9.279 9.407 9.279c2.234 0 4.29-.77 5.907-2.058l4.353 4.353a1 1 0 1 0 1.414-1.414l-4.344-4.344a9.157 9.157 0 0 0 2.076-5.816c0-5.14-4.226-9.28-9.406-9.28zm-7.407 9.279c0-4.006 3.302-7.28 7.407-7.28s7.407 3.274 7.407 7.28-3.302 7.279-7.407 7.279-7.407-3.273-7.407-7.28z"/></svg>;
@@ -15,37 +17,63 @@ const navStyle = ({ isActive }) => ({
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
+  const [showAuth, setShowAuth] = useState(false);
+  const [authTab, setAuthTab] = useState('login');
+
+  const openLogin = () => { setAuthTab('login'); setShowAuth(true); };
+  const openRegister = () => { setAuthTab('register'); setShowAuth(true); };
 
   return (
-    <aside style={{ width: 'var(--sidebar-width)', background: 'var(--sidebar-bg)', display: 'flex', flexDirection: 'column', padding: '1rem', flexShrink: 0, overflowY: 'auto' }}>
-      {/* Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 16px', marginBottom: '2rem' }}>
-        <div style={{ width: 36, height: 36, background: 'var(--accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🎵</div>
-        <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: -0.5 }}>Soundfy</span>
-      </div>
-
-      {/* Nav */}
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: '2rem' }}>
-        <NavLink to="/" end style={navStyle}><HomeIcon /> Home</NavLink>
-        <NavLink to="/search" style={navStyle}><SearchIcon /> Search</NavLink>
-        <NavLink to="/favorites" style={navStyle}><HeartIcon /> Favorites</NavLink>
-        <NavLink to="/playlists" style={navStyle}><PlaylistIcon /> Playlists</NavLink>
-      </nav>
-
-      {/* User */}
-      <div style={{ marginTop: 'auto', borderTop: '1px solid var(--bg-hover)', paddingTop: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px', marginBottom: 8 }}>
-          <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700 }}>
-            {user?.name?.charAt(0).toUpperCase()}
-          </div>
-          <span style={{ fontSize: 13, fontWeight: 600, flex: 1 }}>{user?.name}</span>
+    <>
+      <aside style={{ width: 'var(--sidebar-width)', background: 'var(--sidebar-bg)', display: 'flex', flexDirection: 'column', padding: '1rem', flexShrink: 0, overflowY: 'auto' }}>
+        {/* Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 16px', marginBottom: '2rem' }}>
+          <div style={{ width: 36, height: 36, background: 'var(--accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🎵</div>
+          <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: -0.5 }}>Soundfy</span>
         </div>
-        <button onClick={logout} style={{ width: '100%', padding: '8px 16px', textAlign: 'left', fontSize: 13, color: 'var(--text-secondary)', borderRadius: 6, transition: 'all 0.15s' }}
-          onMouseEnter={e => e.target.style.color = '#fff'}
-          onMouseLeave={e => e.target.style.color = 'var(--text-secondary)'}>
-          Sign out
-        </button>
-      </div>
-    </aside>
+
+        {/* Nav */}
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: '2rem' }}>
+          <NavLink to="/" end style={navStyle}><HomeIcon /> Home</NavLink>
+          <NavLink to="/search" style={navStyle}><SearchIcon /> Search</NavLink>
+          {user && <>
+            <NavLink to="/favorites" style={navStyle}><HeartIcon /> Favorites</NavLink>
+            <NavLink to="/playlists" style={navStyle}><PlaylistIcon /> Playlists</NavLink>
+          </>}
+        </nav>
+
+        {/* Bottom */}
+        <div style={{ marginTop: 'auto', borderTop: '1px solid var(--bg-hover)', paddingTop: '1rem' }}>
+          {user ? (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px', marginBottom: 8 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700 }}>
+                  {user?.name?.charAt(0).toUpperCase()}
+                </div>
+                <span style={{ fontSize: 13, fontWeight: 600, flex: 1 }}>{user?.name}</span>
+              </div>
+              <button onClick={logout} style={{ width: '100%', padding: '8px 16px', textAlign: 'left', fontSize: 13, color: 'var(--text-secondary)', borderRadius: 6, transition: 'all 0.15s' }}
+                onMouseEnter={e => e.target.style.color = '#fff'}
+                onMouseLeave={e => e.target.style.color = 'var(--text-secondary)'}>
+                Sign out
+              </button>
+            </>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 8px' }}>
+              <button onClick={openRegister}
+                style={{ width: '100%', padding: '10px', background: '#fff', color: '#000', borderRadius: 100, fontSize: 13, fontWeight: 700 }}>
+                Sign up
+              </button>
+              <button onClick={openLogin}
+                style={{ width: '100%', padding: '10px', background: 'transparent', color: 'var(--text-secondary)', borderRadius: 100, fontSize: 13, fontWeight: 600, border: '1px solid var(--text-muted)' }}>
+                Log in
+              </button>
+            </div>
+          )}
+        </div>
+      </aside>
+
+      {showAuth && <AuthModal tab={authTab} onClose={() => setShowAuth(false)} />}
+    </>
   );
 }
