@@ -7,17 +7,27 @@ const authRoutes = require('./routes/auth');
 const musicRoutes = require('./routes/music');
 const favoritesRoutes = require('./routes/favorites');
 const playlistsRoutes = require('./routes/playlists');
+const profileRoutes = require('./routes/profile');
 
 dotenv.config();
 const app = express();
 
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
+app.use(cors({
+  origin: function(origin, callback) {
+    if (!origin || origin.includes('vercel.app') || origin === 'http://localhost:5173') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+}));
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/music', musicRoutes);
 app.use('/api/favorites', favoritesRoutes);
 app.use('/api/playlists', playlistsRoutes);
+app.use('/api/profile', profileRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', app: 'Soundfy API' }));
 app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
