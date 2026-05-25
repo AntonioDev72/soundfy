@@ -39,3 +39,9 @@ a { text-decoration: none; color: inherit; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+@media (max-width: 768px) {
+  aside { display: none !important; }
+  main { padding: 1rem !important; padding-bottom: 140px !important; }
+  .mobile-nav { display: block !important; }
+}
